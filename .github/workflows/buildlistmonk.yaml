@@ -13,6 +13,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      #may need to install docker if not already available on the self-hosted runner 
+      #remember to add the self-hosted runner to the docker group to avoid needing sudo for docker commands
       - name: Ensure Docker is installed
         shell: bash
         run: |
