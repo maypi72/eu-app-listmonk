@@ -5,13 +5,13 @@ WORKDIR /app
 COPY . .
 
 RUN go mod download
-RUN go build -o listmonk ./cmd/listmonk
+RUN go build -o listmonk ./cmd
 
 FROM debian:stable-slim
 WORKDIR /app
 
 COPY --from=builder /app/listmonk /app/listmonk
-COPY --from=builder /app/config.toml /app/config.toml
+COPY --from=builder /app/config.toml.sample /app/config.toml
 
 EXPOSE 9000
 CMD ["/app/listmonk"]
