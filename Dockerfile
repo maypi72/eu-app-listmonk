@@ -1,26 +1,22 @@
-FROM alpine:latest
+# Etapa 1: build
+FROM golang:1.22 AS builder
 
-# Install dependencies
-RUN apk --no-cache add ca-certificates tzdata shadow su-exec
+WORKDIR /app
 
-# Set the working directory
-WORKDIR /listmonk
+# Copiamos todo el repo (porque hemos cambiado la estructura y no tenemos carpeta listmonk/)
+COPY . .
 
-# Copy only the necessary files
-COPY listmonk .
-COPY config.toml.sample config.toml
+RUN go mod download
+RUN go build -o listmonk ./cmd/listmonk
 
-# Copy the entrypoint script
-COPY docker-entrypoint.sh /usr/local/bin/
+# Etapa 2: runtime
+FROM debian:stable-slim
 
-# Make the entrypoint script executable
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+WORKDIR /app
 
-# Expose the application port
+COPY --from=builder /app/listmonk /app/listmonk
+COPY --from=builder /app/config.toml /app/config.toml
+
 EXPOSE 9000
 
-# Set the entrypoint
-ENTRYPOINT ["docker-entrypoint.sh"]
-
-# Define the command to run the application
-CMD ["./listmonk"]
+CMD ["/app/listmonk"]
